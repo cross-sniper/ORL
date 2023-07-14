@@ -44,7 +44,8 @@ struct Text : public RenderableObject {
     TTF_Font* font;
 
     Text(int fontSize) {
-        font = TTF_OpenFont("Arial.ttf", fontSize); // Use Arial font (change the font name as needed)
+        TTF_Init();
+        font = TTF_OpenFont("arimo.ttf", fontSize); // Use Arial font (change the font name as needed)
         if (!font) {
             std::cerr << "Failed to load font: " << TTF_GetError() << std::endl;
         }
@@ -171,20 +172,21 @@ public:
         // Initialize SDL
         SDL_Init(SDL_INIT_VIDEO);
 
+        // Initialize SDL_ttf
+        TTF_Init();
+
         // Create the SDL window
         window = SDL_CreateWindow("project x", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screenWidth, screenHeight, SDL_WINDOW_SHOWN);
 
         // Create the SDL renderer
         renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-
-        // Initialize SDL_ttf
-        TTF_Init();
     }
 
     ~RenderingEngine() {
-        TTF_Quit();
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
+
+        TTF_Quit();
         SDL_Quit();
     }
 
