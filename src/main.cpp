@@ -1,5 +1,4 @@
 #include <SDL.h>
-#include <SDL_ttf.h>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -32,42 +31,6 @@ struct Object : public RenderableObject {
     }
 };
 
-struct Text : public RenderableObject {
-    int x;
-    int y;
-    int r;
-    int g;
-    int b;
-    int height;
-    int width;
-    std::string content;
-    TTF_Font* font;
-
-    Text(int fontSize) {
-        TTF_Init();
-        font = TTF_OpenFont("arimo.ttf", fontSize); // Use Arial font (change the font name as needed)
-        if (!font) {
-            std::cerr << "Failed to load font: " << TTF_GetError() << std::endl;
-        }
-    }
-
-    ~Text() {
-        TTF_CloseFont(font);
-    }
-
-    void render(SDL_Renderer* renderer) override {
-        SDL_Color textColor = { static_cast<Uint8>(r), static_cast<Uint8>(g), static_cast<Uint8>(b) };
-
-        SDL_Surface* textSurface = TTF_RenderText_Solid(font, content.c_str(), textColor);
-        SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-        SDL_Rect textRect = { x, y, width, height };
-        SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
-
-        SDL_FreeSurface(textSurface);
-        SDL_DestroyTexture(textTexture);
-    }
-};
-
 std::vector<std::unique_ptr<RenderableObject>> parseObjects(const std::string& filename) {
     std::vector<std::unique_ptr<RenderableObject>> objects;
     std::ifstream file(filename);
@@ -79,7 +42,6 @@ std::vector<std::unique_ptr<RenderableObject>> parseObjects(const std::string& f
 
     std::string line;
     Object currentObject;
-    Text currentText(24); // Use font size 24 (change as needed)
 
     while (std::getline(file, line)) {
         if (line.empty() || line[0] == '#') {
@@ -118,45 +80,6 @@ std::vector<std::unique_ptr<RenderableObject>> parseObjects(const std::string& f
 
             objects.push_back(std::make_unique<Object>(currentObject));
         }
-        else if (line.find("Text {") != std::string::npos) {
-            while (std::getline(file, line)) {
-                if (line.find("}") != std::string::npos) {
-                    objects.push_back(std::make_unique<Text>(currentText));
-                    break;
-                }
-                else if (line.find("Position: (") != std::string::npos) {
-                    size_t startPos = line.find("(") + 1;
-                    size_t endPos = line.find(",", startPos);
-                    currentText.x = std::stoi(line.substr(startPos, endPos - startPos));
-                    startPos = endPos + 2;
-                    endPos = line.find(")", startPos);
-                    currentText.y = std::stoi(line.substr(startPos, endPos - startPos));
-                }
-                else if (line.find("Color: (") != std::string::npos) {
-                    size_t startPos = line.find("(") + 1;
-                    size_t endPos = line.find(",", startPos);
-                    currentText.r = std::stoi(line.substr(startPos, endPos - startPos));
-                    startPos = endPos + 2;
-                    endPos = line.find(",", startPos);
-                    currentText.g = std::stoi(line.substr(startPos, endPos - startPos));
-                    startPos = endPos + 2;
-                    endPos = line.find(")", startPos);
-                    currentText.b = std::stoi(line.substr(startPos, endPos - startPos));
-                }
-                else if (line.find("Size: (") != std::string::npos) {
-                    size_t startPos = line.find("(") + 1;
-                    size_t endPos = line.find(",", startPos);
-                    currentText.width = std::stoi(line.substr(startPos, endPos - startPos));
-                    startPos = endPos + 2;
-                    endPos = line.find(")", startPos);
-                    currentText.height = std::stoi(line.substr(startPos, endPos - startPos));
-                }
-                else if (line.find("Content: ") != std::string::npos) {
-                    size_t startPos = line.find(":") + 1;
-                    currentText.content = line.substr(startPos);
-                }
-            }
-        }
     }
 
     file.close();
@@ -166,14 +89,11 @@ std::vector<std::unique_ptr<RenderableObject>> parseObjects(const std::string& f
 
 class RenderingEngine {
 public:
-    RenderingEngine(int fontSize)
-        : screenWidth(800), screenHeight(600), font(fontSize)
+    RenderingEngine()
+        : screenWidth(800), screenHeight(600)
     {
         // Initialize SDL
         SDL_Init(SDL_INIT_VIDEO);
-
-        // Initialize SDL_ttf
-        TTF_Init();
 
         // Create the SDL window
         window = SDL_CreateWindow("project x", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screenWidth, screenHeight, SDL_WINDOW_SHOWN);
@@ -186,7 +106,6 @@ public:
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
 
-        TTF_Quit();
         SDL_Quit();
     }
 
@@ -228,11 +147,10 @@ private:
     int screenHeight;
     SDL_Window* window;
     SDL_Renderer* renderer;
-    Text font;
 };
 
 int main() {
-    RenderingEngine engine(24); // Use font size 24 (change as needed)
+    RenderingEngine engine;
     engine.run();
 
     return 0;
