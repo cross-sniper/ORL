@@ -21,10 +21,3 @@ Object {
     Size: (100, 100)
     Color: (255, 255, 0)
 }
-
-Text {
-    Position: (400, 400)
-    Size: (200, 50)
-    Color: (255, 255, 255)
-    Content: Hello, World!
-}

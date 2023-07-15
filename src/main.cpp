@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include "sound.cpp" // the module with the sound functions
 #include <memory>
 
 struct RenderableObject {
@@ -97,6 +98,10 @@ public:
 
         // Create the SDL window
         window = SDL_CreateWindow("project x", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screenWidth, screenHeight, SDL_WINDOW_SHOWN);
+        ALCdevice* device;
+        ALCcontext* context;
+        init_sound(&device, &context);
+        play_sound("Mac DeMarco __ Another One (Official Video)(M4A_128K).wav");
 
         // Create the SDL renderer
         renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
