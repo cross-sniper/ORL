@@ -101,8 +101,6 @@ public:
         ALCdevice* device;
         ALCcontext* context;
         init_sound(&device, &context);
-        play_sound("audio.wav");
-
         // Create the SDL renderer
         renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     }
